@@ -1,13 +1,24 @@
 services:
-  fluent-bit:
-    container_name: fluent-bit
-    image: fluent/fluent-bit:latest
+  # fluent-bit:
+  #   container_name: fluent-bit
+  #   image: fluent/fluent-bit:latest
+
+  #   volumes:
+  #     - ./configuration/fluentbit:/fluent-bit/etc
+  #     # Вставить путь до проекта pom_mmwave_vital_signs
+  #     - /home/gamkere/code-project/python-project/pom_mmwave_vital_signs/data/radar:/log-pom
+  
+  fluentd:
+    container_name: fluentd
+    image: kafka-fluent:latest
 
     volumes:
-      - ./configuration/fluentbit:/fluent-bit/etc
-      # Вставить путь до проекта pom_mmwave_vital_signs
-      - /home/gamkere/code-project/python-project/pom_mmwave_vital_signs/data/radar:/log-pom
-  
+      - ./configuration/fluentd:/fluentd/etc
+      - /home/gamkere/code-project/python-project/pom_mmwave_vital_signs/data/radar:/var/log-pom
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+
   kafka1:
     image: bitnami/kafka:latest
     environment:
@@ -25,21 +36,27 @@ services:
 
   ui:
     image: provectuslabs/kafka-ui:v0.4.0
+    
     ports:
       - "8080:8080"
+    
     environment:
       - KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS=kafka1:9092
       - KAFKA_CLUSTERS_0_NAME=kraft
     
   clickhouse:
     image: bitnami/clickhouse:latest
+    
     environment:
-      - ALLOW_EMPTY_PASSWORD=yes
+      - CLICKHOUSE_ADMIN_USER=admin
+      - CLICKHOUSE_ADMIN_PASSWORD=secret
+    
     ports:
       - '8123:8123'
 
     volumes:
-      - volume2:/bitnami/kafka
+      - volume2:/bitnami/clickhouse
+      - ./configuration/clickhouse/init:/
 
 volumes:
   volume1:
