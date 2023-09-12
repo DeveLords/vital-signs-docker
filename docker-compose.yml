@@ -45,10 +45,11 @@ services:
       - KAFKA_CLUSTERS_0_NAME=kraft
     
   clickhouse:
+    container_name: clickhouse
+
     image: bitnami/clickhouse:latest
     
     environment:
-      - CLICKHOUSE_ADMIN_USER=admin
       - CLICKHOUSE_ADMIN_PASSWORD=secret
     
     ports:
@@ -56,7 +57,7 @@ services:
 
     volumes:
       - volume2:/bitnami/clickhouse
-      - ./configuration/clickhouse/init:/
+      - ./configuration/clickhouse/init:/docker-entrypoint-initdb.d
 
 volumes:
   volume1:
